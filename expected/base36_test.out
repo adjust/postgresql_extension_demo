@@ -2,7 +2,7 @@ CREATE EXTENSION base36;
 SELECT base36_encode(0);
  base36_encode 
 ---------------
- 
+ 0
 (1 row)
 
 SELECT base36_encode(1);
