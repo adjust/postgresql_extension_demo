@@ -1,0 +1,10 @@
+CREATE EXTENSION base36;
+SELECT '120'::base36;
+SELECT '3c'::base36;
+CREATE TABLE base36_test(val base36);
+INSERT INTO base36_test VALUES ('123'), ('3c'), ('5A'), ('zZz');
+SELECT * FROM base36_test;
+SELECT '120'::base36 > '3c'::base36;
+SELECT * FROM base36_test ORDER BY val;
+EXPLAIN (COSTS OFF) SELECT * FROM base36_test where NOT val < 'c1';
+SELECT 'abcdefghi'::base36;
