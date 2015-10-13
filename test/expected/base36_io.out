@@ -1,0 +1,69 @@
+-- simple input
+SELECT '120'::base36;
+ base36 
+--------
+ 120
+(1 row)
+
+SELECT '3c'::base36;
+ base36 
+--------
+ 3c
+(1 row)
+
+-- case insensitivity
+SELECT '3C'::base36;
+ base36 
+--------
+ 3c
+(1 row)
+
+SELECT 'FoO'::base36;
+ base36 
+--------
+ foo
+(1 row)
+
+-- invalid characters
+SELECT 'foo bar'::base36;
+ERROR:  invalid input syntax for base36: "foo bar"
+LINE 1: SELECT 'foo bar'::base36;
+               ^
+SELECT 'abc$%2'::base36;
+ERROR:  invalid input syntax for base36: "abc$%2"
+LINE 1: SELECT 'abc$%2'::base36;
+               ^
+-- negative values
+SELECT '-10'::base36;
+ERROR:  negative values are not allowed
+DETAIL:  value -36 is negative
+HINT:  make it positive
+-- to big values
+SELECT 'abcdefghi'::base36;
+ERROR:  integer out of range
+LINE 1: SELECT 'abcdefghi'::base36;
+               ^
+-- storage
+BEGIN;
+CREATE TABLE base36_test(val base36);
+INSERT INTO base36_test VALUES ('123'), ('3c'), ('5A'), ('zZz');
+SELECT * FROM base36_test;
+ val 
+-----
+ 123
+ 3c
+ 5a
+ zzz
+(4 rows)
+
+UPDATE base36_test SET val = '567a' where val = '123';
+SELECT * FROM base36_test;
+ val  
+------
+ 3c
+ 5a
+ zzz
+ 567a
+(4 rows)
+
+ROLLBACK;

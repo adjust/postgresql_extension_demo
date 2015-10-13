@@ -28,7 +28,7 @@ CREATE TABLE base36_test AS
 SELECT i::base36 as val FROM generate_series(1,10000) i;
 CREATE INDEX ON base36_test(val);
 ANALYZE;
-SET enable_seqscan TO off; -- http://www.postgresql.org/docs/9.4/static/runtime-config-query.html
+SET enable_seqscan TO off;
 EXPLAIN (COSTS OFF) SELECT * FROM base36_test where NOT val < 'c1';
 EXPLAIN (COSTS OFF) SELECT * FROM base36_test where NOT 'c1' > val;
 EXPLAIN (COSTS OFF) SELECT * FROM base36_test where 'c1' > val;
