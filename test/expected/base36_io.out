@@ -36,6 +36,8 @@ LINE 1: SELECT 'abc$%2'::base36;
 -- negative values
 SELECT '-10'::base36;
 ERROR:  negative values are not allowed
+LINE 1: SELECT '-10'::base36;
+               ^
 DETAIL:  value -36 is negative
 HINT:  make it positive
 -- to big values
@@ -66,4 +68,12 @@ SELECT * FROM base36_test;
  567a
 (4 rows)
 
+UPDATE base36_test SET val = '-aa' where val = '3c';
+ERROR:  negative values are not allowed
+LINE 1: UPDATE base36_test SET val = '-aa' where val = '3c';
+                                     ^
+DETAIL:  value -370 is negative
+HINT:  make it positive
+SELECT * FROM base36_test;
+ERROR:  current transaction is aborted, commands ignored until end of transaction block
 ROLLBACK;

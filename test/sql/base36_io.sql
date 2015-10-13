@@ -19,4 +19,6 @@ INSERT INTO base36_test VALUES ('123'), ('3c'), ('5A'), ('zZz');
 SELECT * FROM base36_test;
 UPDATE base36_test SET val = '567a' where val = '123';
 SELECT * FROM base36_test;
+UPDATE base36_test SET val = '-aa' where val = '3c';
+SELECT * FROM base36_test;
 ROLLBACK;

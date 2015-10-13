@@ -20,6 +20,15 @@ base36_in(PG_FUNCTION_ARGS)
              errmsg("invalid input syntax for base36: \"%s\"", str)
             )
         );
+    if (result < 0)
+        ereport(ERROR,
+            (
+             errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
+             errmsg("negative values are not allowed"),
+             errdetail("value %ld is negative", result),
+             errhint("make it positive")
+            )
+        );
     PG_RETURN_DATUM(DirectFunctionCall1(int84,(int32)result));
 }
 
