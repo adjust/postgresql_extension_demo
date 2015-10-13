@@ -10,8 +10,16 @@ Datum
 base36_in(PG_FUNCTION_ARGS)
 {
     long result;
+    char *bad;
     char *str = PG_GETARG_CSTRING(0);
-    result = strtoul(str, NULL, 36);
+    result = strtoul(str, &bad, 36);
+    if (bad[0] != '\0' || strlen(str)==0)
+        ereport(ERROR,
+            (
+             errcode(ERRCODE_SYNTAX_ERROR),
+             errmsg("invalid input syntax for base36: \"%s\"", str)
+            )
+        );
     PG_RETURN_DATUM(DirectFunctionCall1(int84,(int32)result));
 }
 
