@@ -1,6 +1,7 @@
 #include "postgres.h"
 #include "fmgr.h"
 #include "utils/builtins.h"
+#include "utils/int8.h"
 
 PG_MODULE_MAGIC;
 
@@ -11,7 +12,7 @@ base36_in(PG_FUNCTION_ARGS)
     long result;
     char *str = PG_GETARG_CSTRING(0);
     result = strtoul(str, NULL, 36);
-    PG_RETURN_INT32((int32)result);
+    PG_RETURN_DATUM(DirectFunctionCall1(int84,(int32)result));
 }
 
 PG_FUNCTION_INFO_V1(base36_out);
