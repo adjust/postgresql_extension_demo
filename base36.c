@@ -9,6 +9,15 @@ Datum
 base36_encode(PG_FUNCTION_ARGS)
 {
     int32 arg = PG_GETARG_INT32(0);
+    if (arg < 0)
+        ereport(ERROR,
+            (
+             errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
+             errmsg("negative values are not allowed"),
+             errdetail("value %d is negative", arg),
+             errhint("make it positive")
+            )
+        );
     char base36[36] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
     /* max 6 char + '\0' */

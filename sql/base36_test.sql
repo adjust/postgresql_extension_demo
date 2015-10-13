@@ -5,3 +5,4 @@ SELECT base36_encode(10);
 SELECT base36_encode(35);
 SELECT base36_encode(36);
 SELECT base36_encode(123456789);
+SELECT base36_encode(-36);

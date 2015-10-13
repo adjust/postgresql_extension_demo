@@ -35,3 +35,7 @@ SELECT base36_encode(123456789);
  21i3v9
 (1 row)
 
+SELECT base36_encode(-36);
+ERROR:  negative values are not allowed
+DETAIL:  value -36 is negative
+HINT:  make it positive
