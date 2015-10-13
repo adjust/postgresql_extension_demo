@@ -31,13 +31,13 @@ base36_out(PG_FUNCTION_ARGS)
     char base36[36] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
     /* max 6 char + '\0' */
-    char *buffer        = palloc(7 * sizeof(char));
-    unsigned int offset = 7 * sizeof(char);
-    buffer[--offset]    = '\0';
+    char buffer[7];
+    unsigned int offset = sizeof(buffer);
+    buffer[--offset] = '\0';
 
     do {
         buffer[--offset] = base36[arg % 36];
     } while (arg /= 36);
 
-    PG_RETURN_CSTRING(&buffer[offset]);
+    PG_RETURN_CSTRING(pstrdup(&buffer[offset]));
 }
