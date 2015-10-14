@@ -3,12 +3,12 @@
 
 CREATE FUNCTION bigbase36_in(cstring)
 RETURNS bigbase36
-AS '$libdir/base36'
+AS 'MODULE_PATHNAME'
 LANGUAGE C IMMUTABLE STRICT;
 
 CREATE FUNCTION bigbase36_out(bigbase36)
 RETURNS cstring
-AS '$libdir/base36'
+AS 'MODULE_PATHNAME'
 LANGUAGE C IMMUTABLE STRICT;
 
 CREATE TYPE bigbase36 (
