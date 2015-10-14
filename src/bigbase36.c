@@ -1,15 +1,12 @@
 #include "postgres.h"
 #include "fmgr.h"
 #include "utils/builtins.h"
-#include "utils/int8.h"
 
-PG_MODULE_MAGIC;
-
-PG_FUNCTION_INFO_V1(base36_in);
+PG_FUNCTION_INFO_V1(bigbase36_in);
 Datum
-base36_in(PG_FUNCTION_ARGS)
+bigbase36_in(PG_FUNCTION_ARGS)
 {
-    long result;
+    int64 result;
     char *bad;
     char *str = PG_GETARG_CSTRING(0);
     result = strtoul(str, &bad, 36);
@@ -17,7 +14,7 @@ base36_in(PG_FUNCTION_ARGS)
         ereport(ERROR,
             (
              errcode(ERRCODE_SYNTAX_ERROR),
-             errmsg("invalid input syntax for base36: \"%s\"", str)
+             errmsg("invalid input syntax for bigbase36: \"%s\"", str)
             )
         );
     if (result < 0)
@@ -29,27 +26,27 @@ base36_in(PG_FUNCTION_ARGS)
              errhint("make it positive")
             )
         );
-    PG_RETURN_DATUM(DirectFunctionCall1(int84,(int32)result));
+    PG_RETURN_INT64(result);
 }
 
-PG_FUNCTION_INFO_V1(base36_out);
+PG_FUNCTION_INFO_V1(bigbase36_out);
 Datum
-base36_out(PG_FUNCTION_ARGS)
+bigbase36_out(PG_FUNCTION_ARGS)
 {
-    int32 arg = PG_GETARG_INT32(0);
+    int64 arg = PG_GETARG_INT64(0);
     if (arg < 0)
         ereport(ERROR,
             (
              errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
              errmsg("negative values are not allowed"),
-             errdetail("value %d is negative", arg),
+             errdetail("value %ld is negative", arg),
              errhint("make it positive")
             )
         );
     char base36[36] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-    /* max 6 char + '\0' */
-    char buffer[7];
+    /* max 13 char + '\0' */
+    char buffer[14];
     unsigned int offset = sizeof(buffer);
     buffer[--offset] = '\0';
 
