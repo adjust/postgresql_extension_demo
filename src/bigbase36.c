@@ -14,15 +14,7 @@ bigbase36_in(PG_FUNCTION_ARGS)
 
     if (bad[0] != '\0' || strlen(str)==0)
         BASE36SYNTAX_ERROR(str,"bigbase36");
-    if (result < 0)
-        ereport(ERROR,
-            (
-             errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-             errmsg("negative values are not allowed"),
-             errdetail("value %ld is negative", result),
-             errhint("make it positive")
-            )
-        );
+
     PG_RETURN_INT64((int64)result);
 }
 
@@ -31,24 +23,31 @@ Datum
 bigbase36_out(PG_FUNCTION_ARGS)
 {
     int64 arg = PG_GETARG_INT64(0);
-    if (arg < 0)
+    bool  neg = false;
+    if (arg <= LONG_MIN || arg >= LONG_MAX)
         ereport(ERROR,
-            (
-             errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-             errmsg("negative values are not allowed"),
-             errdetail("value %ld is negative", arg),
-             errhint("make it positive")
-            )
-        );
+        (
+         errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
+         errmsg("bigbase36 out of range")
+        ));
 
-    /* max 13 char + '\0' */
-    char buffer[14];
+    if (arg < 0)
+    {
+        arg = -arg;
+        neg = true;
+    }
+
+    /* max 13 char + '\0' + sign */
+    char buffer[15];
     unsigned int offset = sizeof(buffer);
     buffer[--offset] = '\0';
 
     do {
         buffer[--offset] = base36_digits[arg % 36];
     } while (arg /= 36);
+
+    if (neg)
+        buffer[--offset] = '-';
 
     PG_RETURN_CSTRING(pstrdup(&buffer[offset]));
 }

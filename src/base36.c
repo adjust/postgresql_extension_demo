@@ -18,15 +18,6 @@ base36_in(PG_FUNCTION_ARGS)
     if (bad[0] != '\0' || strlen(str)==0)
         BASE36SYNTAX_ERROR(str,"base36");
 
-    if (result < 0)
-        ereport(ERROR,
-            (
-             errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-             errmsg("negative values are not allowed"),
-             errdetail("value %ld is negative", result),
-             errhint("make it positive")
-            )
-        );
     PG_RETURN_INT32((int32)result);
 }
 
@@ -35,24 +26,25 @@ Datum
 base36_out(PG_FUNCTION_ARGS)
 {
     int32 arg = PG_GETARG_INT32(0);
-    if (arg < 0)
-        ereport(ERROR,
-            (
-             errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-             errmsg("negative values are not allowed"),
-             errdetail("value %d is negative", arg),
-             errhint("make it positive")
-            )
-        );
+    bool  neg = false;
 
-    /* max 6 char + '\0' */
-    char buffer[7];
+    if (arg < 0)
+    {
+        arg = -arg;
+        neg = true;
+    }
+
+    /* max 6 char + '\0' + sign*/
+    char buffer[8];
     unsigned int offset = sizeof(buffer);
     buffer[--offset] = '\0';
 
     do {
         buffer[--offset] = base36_digits[arg % 36];
     } while (arg /= 36);
+
+    if (neg)
+        buffer[--offset] = '-';
 
     PG_RETURN_CSTRING(pstrdup(&buffer[offset]));
 }
