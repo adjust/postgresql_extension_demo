@@ -1,0 +1,150 @@
+-- comparison
+SELECT '120'::bigbase36 > '3c'::bigbase36;
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT '120'::bigbase36 >= '3c'::bigbase36;
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT '120'::bigbase36 < '3c'::bigbase36;
+ ?column? 
+----------
+ f
+(1 row)
+
+SELECT '120'::bigbase36 <= '3c'::bigbase36;
+ ?column? 
+----------
+ f
+(1 row)
+
+SELECT '120'::bigbase36 <> '3c'::bigbase36;
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT '120'::bigbase36 = '3c'::bigbase36;
+ ?column? 
+----------
+ f
+(1 row)
+
+-- comparison equals
+SELECT '120'::bigbase36 > '120'::bigbase36;
+ ?column? 
+----------
+ f
+(1 row)
+
+SELECT '120'::bigbase36 >= '120'::bigbase36;
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT '120'::bigbase36 < '120'::bigbase36;
+ ?column? 
+----------
+ f
+(1 row)
+
+SELECT '120'::bigbase36 <= '120'::bigbase36;
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT '120'::bigbase36 <> '120'::bigbase36;
+ ?column? 
+----------
+ f
+(1 row)
+
+SELECT '120'::bigbase36 = '120'::bigbase36;
+ ?column? 
+----------
+ t
+(1 row)
+
+-- comparison negation
+SELECT NOT '120'::bigbase36 > '120'::bigbase36;
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT NOT '120'::bigbase36 >= '120'::bigbase36;
+ ?column? 
+----------
+ f
+(1 row)
+
+SELECT NOT '120'::bigbase36 < '120'::bigbase36;
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT NOT '120'::bigbase36 <= '120'::bigbase36;
+ ?column? 
+----------
+ f
+(1 row)
+
+SELECT NOT '120'::bigbase36 <> '120'::bigbase36;
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT NOT '120'::bigbase36 = '120'::bigbase36;
+ ?column? 
+----------
+ f
+(1 row)
+
+--commutator and negator
+BEGIN;
+CREATE TABLE base36_test AS
+SELECT i::base36 as val FROM generate_series(1,10000) i;
+CREATE INDEX ON base36_test(val);
+ANALYZE;
+SET enable_seqscan TO off;
+EXPLAIN (COSTS OFF) SELECT * FROM base36_test where NOT val < 'c1';
+                        QUERY PLAN                        
+----------------------------------------------------------
+ Index Only Scan using base36_test_val_idx on base36_test
+   Index Cond: (val >= 'c1'::base36)
+(2 rows)
+
+EXPLAIN (COSTS OFF) SELECT * FROM base36_test where NOT 'c1' > val;
+                        QUERY PLAN                        
+----------------------------------------------------------
+ Index Only Scan using base36_test_val_idx on base36_test
+   Index Cond: (val >= 'c1'::base36)
+(2 rows)
+
+EXPLAIN (COSTS OFF) SELECT * FROM base36_test where 'c1' > val;
+                        QUERY PLAN                        
+----------------------------------------------------------
+ Index Only Scan using base36_test_val_idx on base36_test
+   Index Cond: (val < 'c1'::base36)
+(2 rows)
+
+-- hash aggregate
+SET enable_seqscan TO on;
+EXPLAIN (COSTS OFF) SELECT val, COUNT(*) FROM base36_test GROUP BY 1;
+          QUERY PLAN           
+-------------------------------
+ HashAggregate
+   Group Key: val
+   ->  Seq Scan on base36_test
+(3 rows)
+
+ROLLBACK;

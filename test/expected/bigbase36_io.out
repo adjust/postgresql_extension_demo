@@ -1,53 +1,53 @@
 -- simple input
-SELECT '120'::base36;
- base36 
---------
+SELECT '120'::bigbase36;
+ bigbase36 
+-----------
  120
 (1 row)
 
-SELECT '3c'::base36;
- base36 
---------
+SELECT '3c'::bigbase36;
+ bigbase36 
+-----------
  3c
 (1 row)
 
 -- case insensitivity
-SELECT '3C'::base36;
- base36 
---------
+SELECT '3C'::bigbase36;
+ bigbase36 
+-----------
  3c
 (1 row)
 
-SELECT 'FoO'::base36;
- base36 
---------
+SELECT 'FoO'::bigbase36;
+ bigbase36 
+-----------
  foo
 (1 row)
 
 -- invalid characters
-SELECT 'foo bar'::base36;
-ERROR:  invalid input syntax for base36: "foo bar"
-LINE 1: SELECT 'foo bar'::base36;
+SELECT 'foo bar'::bigbase36;
+ERROR:  invalid input syntax for bigbase36: "foo bar"
+LINE 1: SELECT 'foo bar'::bigbase36;
                ^
-SELECT 'abc$%2'::base36;
-ERROR:  invalid input syntax for base36: "abc$%2"
-LINE 1: SELECT 'abc$%2'::base36;
+SELECT 'abc$%2'::bigbase36;
+ERROR:  invalid input syntax for bigbase36: "abc$%2"
+LINE 1: SELECT 'abc$%2'::bigbase36;
                ^
 -- negative values
-SELECT '-10'::base36;
+SELECT '-10'::bigbase36;
 ERROR:  negative values are not allowed
-LINE 1: SELECT '-10'::base36;
+LINE 1: SELECT '-10'::bigbase36;
                ^
 DETAIL:  value -36 is negative
 HINT:  make it positive
 -- to big values
-SELECT 'abcdefghi'::base36;
-ERROR:  value "abcdefghi" is out of range for type base36
-LINE 1: SELECT 'abcdefghi'::base36;
+SELECT 'abcdefghijklmn'::bigbase36;
+ERROR:  value "abcdefghijklmn" is out of range for type bigbase36
+LINE 1: SELECT 'abcdefghijklmn'::bigbase36;
                ^
 -- storage
 BEGIN;
-CREATE TABLE base36_test(val base36);
+CREATE TABLE base36_test(val bigbase36);
 INSERT INTO base36_test VALUES ('123'), ('3c'), ('5A'), ('zZz');
 SELECT * FROM base36_test;
  val 

@@ -1,22 +1,19 @@
-#include "postgres.h"
-#include "fmgr.h"
-#include "utils/builtins.h"
+#include "base36.h"
 
 PG_FUNCTION_INFO_V1(bigbase36_in);
 Datum
 bigbase36_in(PG_FUNCTION_ARGS)
 {
-    int64 result;
+    long result;
     char *bad;
     char *str = PG_GETARG_CSTRING(0);
-    result = strtoul(str, &bad, 36);
+    result = strtol(str, &bad, 36);
+
+    if (result == LONG_MIN || result == LONG_MAX)
+        BASE36OUTOFRANGE_ERROR(str, "bigbase36");
+
     if (bad[0] != '\0' || strlen(str)==0)
-        ereport(ERROR,
-            (
-             errcode(ERRCODE_SYNTAX_ERROR),
-             errmsg("invalid input syntax for bigbase36: \"%s\"", str)
-            )
-        );
+        BASE36SYNTAX_ERROR(str,"bigbase36");
     if (result < 0)
         ereport(ERROR,
             (
@@ -26,7 +23,7 @@ bigbase36_in(PG_FUNCTION_ARGS)
              errhint("make it positive")
             )
         );
-    PG_RETURN_INT64(result);
+    PG_RETURN_INT64((int64)result);
 }
 
 PG_FUNCTION_INFO_V1(bigbase36_out);
@@ -43,7 +40,6 @@ bigbase36_out(PG_FUNCTION_ARGS)
              errhint("make it positive")
             )
         );
-    char base36[36] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
     /* max 13 char + '\0' */
     char buffer[14];
@@ -51,7 +47,7 @@ bigbase36_out(PG_FUNCTION_ARGS)
     buffer[--offset] = '\0';
 
     do {
-        buffer[--offset] = base36[arg % 36];
+        buffer[--offset] = base36_digits[arg % 36];
     } while (arg /= 36);
 
     PG_RETURN_CSTRING(pstrdup(&buffer[offset]));
